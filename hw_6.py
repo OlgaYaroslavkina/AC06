@@ -2,6 +2,7 @@ import sys
 from pathlib import Path
 import uuid
 import shutil
+import os
 
 from normalize import normalize
 
@@ -49,13 +50,16 @@ def unpack_archive(path: Path) -> None:
     for item in path.glob(f"{archive_folder}/*"):
         filename = item.stem
         arh_dir = path.joinpath(path / archive_folder / filename)
-        arh_dir.mkdir()
+        os.mkdir(arh_dir)
         shutil.unpack_archive(item, arh_dir)
 
 def delete_empty_folders(path: Path):
-    folders_to_delete = [f for f in path.glob("**")]
-    for folder in folders_to_delete[::-1]:
-        folder.rmdir()
+    for root, dirs, files in os.walk(path, topdown=False):
+        for dir in dirs:
+            dir_path = os.path.join(root, dir)
+            if not os.listdir(dir_path):
+                os.rmdir(dir_path)
+            
 
 def main():
     try:
